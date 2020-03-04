@@ -25,6 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   intl: ^0.16.0
   infinite_view_pager: ^1.0.0
+  provider: ^4.0.4
 
 dev_dependencies:
   flutter_test:
@@ -58,12 +59,21 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: MavenPro
+      fonts:
+        - asset: fonts/MavenPro/MavenPro-Regular.ttf
+        - asset: fonts/MavenPro/MavenPro-Bold.ttf
+          weight: 700
+        - asset: fonts/MavenPro/MavenPro-SemiBold.ttf
+          weight: 500
+    - family: Yantramanav
+      fonts:
+        - asset: fonts/Yantramanav/Yantramanav-Regular.ttf
+        - asset: fonts/Yantramanav/Yantramanav-Bold.ttf
+          weight: 700
+        - asset: fonts/Yantramanav/Yantramanav-Medium.ttf
+          weight: 500
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

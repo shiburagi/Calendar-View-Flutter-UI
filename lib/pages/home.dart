@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         double widthPerCell = _calendarKey.currentContext.size.width / 7;
         double heightPerCell = widthPerCell / 1.3;
         calendarMinHeight = 64 + heightPerCell * 2;
-        debugPrint("$calendarMinHeight $heightPerCell");
+        
       }
     });
     super.initState();
