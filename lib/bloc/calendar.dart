@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+
 class CalendarBloc {
   StreamController<DateTime> _streamController = StreamController<DateTime>();
   Stream<DateTime> stream;
@@ -18,6 +20,7 @@ class CalendarBloc {
   CalendarBloc() {
     stream = _streamController.stream.asBroadcastStream();
     monthStream = _monthStreamController.stream.asBroadcastStream();
+    _monthStreamController.sink.add(DateTime.now());
 
     stream.listen((DateTime data) {
       _dateTime = data;
@@ -25,7 +28,6 @@ class CalendarBloc {
     monthStream.listen((DateTime data) {
       _monthDateTime = data;
     });
-    _monthStreamController.sink.add(DateTime.now());
   }
 
   void dispose() {

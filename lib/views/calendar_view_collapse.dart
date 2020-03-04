@@ -26,6 +26,7 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
     super.didChangeDependencies();
     bloc = Provider.of(context);
   }
+
   int get daysInMonth {
     DateTime _dateTime = bloc.monthDateTime;
     return DateTime(_dateTime.year, _dateTime.month + 1, 1)
@@ -37,7 +38,6 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
     DateTime _dateTime = bloc.monthDateTime;
     return (DateTime(_dateTime.year, _dateTime.month, 1).weekday) % 7;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +56,9 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
         bloc.collapseDateTime = bloc.collapseDateTime.subtract(Duration(
           days: bloc.collapseDateTime.weekday % 7,
         ));
-
-      if (bloc.collapseDateTime.month != month.month ||
-          bloc.collapseDateTime.year != month.year) {
-        updateDate(bloc.collapseDateTime.subtract(Duration(
-          days: bloc.collapseDateTime.day - 1,
-        )));
+      if (widget.selected[0].month != month.month ||
+          widget.selected[0].year != month.year) {
+        updateDate(widget.selected[0]);
       }
     }
     return Container(
@@ -71,7 +68,7 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
           bloc.collapseDateTime =
               bloc.collapseDateTime.add(Duration(days: 7 * direction));
           if (bloc.collapseDateTime.month != month.month) {
-            addMonth(bloc.collapseDateTime.month - month.month);
+            updateDate(bloc.collapseDateTime);
           }
         },
         pageBuilder: (context, week) => Container(
@@ -88,12 +85,13 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
                     int day = bloc.collapseDateTime.day + i + week * 7;
                     DateTime dateTime = DateTime(bloc.collapseDateTime.year,
                         bloc.collapseDateTime.month, day);
-                    bool notSameMonth = dateTime.month != month.month;
+                    bool notSameMonth =
+                        dateTime.month != bloc.monthDateTime.month;
 
                     return InkWell(
                       onTap: () {
                         if (notSameMonth) {
-                          addMonth(dateTime.month - month.month);
+                          updateDate(dateTime);
                         }
                         bloc.collapseDateTime = null;
                         bloc.updateSelectedDate(dateTime);
