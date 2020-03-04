@@ -110,10 +110,10 @@ class _CalendarViewState extends State<CalendarView> {
     if (_collapseDateTime == null) {
       _collapseDateTime = DateTime.fromMillisecondsSinceEpoch(
           widget.selected[0].millisecondsSinceEpoch);
-
-      _collapseDateTime = _collapseDateTime.subtract(Duration(
-        days: _collapseDateTime.weekday,
-      ));
+      if (_collapseDateTime.weekday > 0)
+        _collapseDateTime = _collapseDateTime.subtract(Duration(
+          days: _collapseDateTime.weekday % 7,
+        ));
     }
     return Container(
       height: 60,
@@ -143,7 +143,6 @@ class _CalendarViewState extends State<CalendarView> {
 
                     return InkWell(
                       onTap: () {
-
                         if (notSameMonth) {
                           addMonth(dateTime.month - _dateTime.month);
                         }

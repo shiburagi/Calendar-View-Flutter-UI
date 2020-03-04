@@ -28,9 +28,13 @@ class _HomePageState extends State<HomePage> {
     dateTime.subtract(Duration(days: dateTime.weekday));
     _selectedDates.add(DateTime(dateTime.year, dateTime.month, dateTime.day));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      
-      if (calendarMaxHeight == null)
+      if (calendarMaxHeight == null) {
         calendarMaxHeight = _calendarKey.currentContext.size.height;
+        double widthPerCell = _calendarKey.currentContext.size.width / 7;
+        double heightPerCell = widthPerCell / 1.3;
+        calendarMinHeight = 64 + heightPerCell * 2;
+        debugPrint("$calendarMinHeight $heightPerCell");
+      }
     });
     super.initState();
   }
@@ -81,8 +85,6 @@ class _HomePageState extends State<HomePage> {
                     double newHeight =
                         (calendarHeight ?? calendarMaxHeight) - diff;
 
-                    
-
                     if (newHeight >= calendarMinHeight &&
                         newHeight <= calendarMaxHeight)
                       setState(() {
@@ -93,8 +95,9 @@ class _HomePageState extends State<HomePage> {
                     double mid = calendarMinHeight +
                         (calendarMaxHeight - calendarMinHeight) / 2;
                     setState(() {
-                      calendarHeight =
-                          calendarHeight > mid ? null : calendarMinHeight;
+                      if (calendarHeight != null)
+                        calendarHeight =
+                            calendarHeight > mid ? null : calendarMinHeight;
                     });
                   },
                 ),
