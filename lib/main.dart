@@ -10,9 +10,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
+        accentColor: Colors.redAccent,
       ),
-      home: HomePage(title: 'Flutter Demo Home Page'),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.blue,
+        accentColor: Colors.redAccent,
+      ),
+      themeMode: ThemeMode.system,
+      home: HomePage(title: 'Calendar'),
       debugShowCheckedModeBanner: false,
     );
   }
