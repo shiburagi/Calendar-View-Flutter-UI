@@ -39,10 +39,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
     super.initState();
     controller = AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this)
-      ..addListener(() {
-        debugPrint(controller.value.toString());
-      });
+        duration: const Duration(milliseconds: 500), vsync: this);
   }
 
   Future<void> _playAnimation() async {
@@ -87,21 +84,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SizedBox(
-                height: calendarHeight,
-                child: SingleChildScrollView(
-                  physics: NeverScrollableScrollPhysics(),
-                  child: CalendarView(
-                    key: _calendarKey,
-                    animation: controller.view,
-                    collapseView: calendarHeight == calendarMinHeight,
-                    selected: _selectedDates,
-                    onDateSelected: (datetTime) => setState(() {
-                      _selectedDates[0] = datetTime;
-                    }),
-                  ),
-                ),
-              ),
+              AnimatedBuilder(
+                  animation: controller.view,
+                  builder: (context, child) {
+                    double height;
+                    if (calendarMaxHeight != null) {
+                      double range = calendarMaxHeight - calendarMinHeight;
+                      height =
+                          calendarMinHeight + range * (1 - controller.value);
+                    }
+                    return SizedBox(
+                      height: height,
+                      child: SingleChildScrollView(
+                        physics: NeverScrollableScrollPhysics(),
+                        child: CalendarView(
+                          key: _calendarKey,
+                          animation: controller.view,
+                          collapseView: controller.value == 1,
+                          selected: _selectedDates,
+                          onDateSelected: (datetTime) => setState(() {
+                            _selectedDates[0] = datetTime;
+                          }),
+                        ),
+                      ),
+                    );
+                  }),
               Expanded(
                 child: GestureDetector(
                   child: EventList(events: eventMap[_selectedDates[0]]),
@@ -122,20 +129,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       double percent = (newHeight - calendarMinHeight) / range;
                       controller.animateTo(1 - percent,
                           duration: Duration(milliseconds: 0));
-                      setState(() {
-                        calendarHeight = newHeight;
-                      });
+                      // setState(() {
+                      calendarHeight = newHeight;
+                      // });
                     }
                   },
                   onVerticalDragEnd: (DragEndDetails details) {
                     double mid = calendarMinHeight +
                         (calendarMaxHeight - calendarMinHeight) / 2;
-                    setState(() {
-                      if (calendarHeight != null)
-                        calendarHeight =
-                            calendarHeight > mid ? null : calendarMinHeight;
-                      _playAnimation();
-                    });
+                    // setState(() {
+                    if (calendarHeight != null)
+                      calendarHeight =
+                          calendarHeight > mid ? null : calendarMinHeight;
+                    _playAnimation();
+                    // });
                   },
                 ),
                 flex: 1,

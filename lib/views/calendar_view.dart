@@ -108,7 +108,7 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
           parent: widget.animation,
           curve: Interval(
             0.0,
-            0.9,
+            1.0,
             curve: Curves.easeInOutBack,
           ),
         ),
@@ -192,61 +192,62 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
             : Colors.white;
     return Container(
         height: 64,
-        padding: EdgeInsets.symmetric(horizontal: 16 * (1.0 - opacityValue)),
         color: widget.monthColor,
-        child: Row(
+        child: Stack(
           children: <Widget>[
-            Transform.translate(
-              offset: Offset(-24 * (1.0 - opacityValue), 0),
-              child: Container(
-                width: 48 * opacityValue,
-                child: Opacity(
-                  opacity: opacityValue,
-                  child: IconButton(
-                    onPressed: () => addMonth(-1),
-                    icon: Icon(
-                      Icons.chevron_left,
-                      size: 32,
-                      color: textColor,
-                    ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: -24 * (1.0 - opacityValue),
+              child: Opacity(
+                opacity: opacityValue,
+                child: IconButton(
+                  onPressed: () => addMonth(-1),
+                  icon: Icon(
+                    Icons.chevron_left,
+                    size: 32,
+                    color: textColor,
                   ),
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: StreamBuilder<DateTime>(
-                  stream: bloc.monthStream,
-                  builder: (context, snapshot) {
-                    DateTime dateTime = snapshot.data ?? bloc.monthDateTime;
-                    String month = DateFormat("MMMM yyyy").format(dateTime);
+            Positioned.fill(
+              left: 16 + 32 * (opacityValue),
+              right: 16 + 32 * (opacityValue),
+              child: Container(
+                alignment: Alignment.centerLeft,
+                child: StreamBuilder<DateTime>(
+                    stream: bloc.monthStream,
+                    builder: (context, snapshot) {
+                      DateTime dateTime = snapshot.data ?? bloc.monthDateTime;
+                      String month = DateFormat("MMMM yyyy").format(dateTime);
 
-                    return InkWell(
-                      onTap: widget.collapseView ? null : showMonthPicker,
-                      child: Container(
-                        child: Text(
-                          month,
-                          style: theme.textTheme.headline.copyWith(
-                            color: textColor,
+                      return InkWell(
+                        onTap: widget.collapseView ? null : showMonthPicker,
+                        child: Container(
+                          child: Text(
+                            month,
+                            style: theme.textTheme.headline.copyWith(
+                              color: textColor,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+              ),
             ),
-            Transform.translate(
-              offset: Offset(24 * (1.0 - opacityValue), 0),
-              child: Container(
-                width: 48 * opacityValue,
-                child: Opacity(
-                  opacity: opacityValue,
-                  child: IconButton(
-                    onPressed: () => addMonth(1),
-                    icon: Icon(
-                      Icons.chevron_right,
-                      size: 32,
-                      color: textColor,
-                    ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: -24 * (1.0 - opacityValue),
+              child: Opacity(
+                opacity: opacityValue,
+                child: IconButton(
+                  onPressed: () => addMonth(1),
+                  icon: Icon(
+                    Icons.chevron_right,
+                    size: 32,
+                    color: textColor,
                   ),
                 ),
               ),
