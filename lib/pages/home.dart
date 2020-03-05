@@ -11,7 +11,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  AnimationController controller;
+
   ThemeData get theme => Theme.of(context);
   List<DateTime> _selectedDates = [];
 
@@ -33,10 +35,38 @@ class _HomePageState extends State<HomePage> {
         double widthPerCell = _calendarKey.currentContext.size.width / 7;
         double heightPerCell = widthPerCell / 1.3;
         calendarMinHeight = 64 + heightPerCell * 2;
-        
       }
     });
     super.initState();
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this)
+      ..addListener(() {
+        debugPrint(controller.value.toString());
+      });
+  }
+
+  Future<void> _playAnimation() async {
+    if (calendarHeight == calendarMinHeight) {
+      await _collapseAnimation();
+    } else {
+      await _expandAnimation();
+    }
+  }
+
+  Future<void> _collapseAnimation() async {
+    try {
+      await controller.forward(from: controller.value).orCancel;
+    } on TickerCanceled {
+      // the animation got canceled, probably because we were disposed
+    }
+  }
+
+  Future<void> _expandAnimation() async {
+    try {
+      await controller.reverse(from: controller.value).orCancel;
+    } on TickerCanceled {
+      // the animation got canceled, probably because we were disposed
+    }
   }
 
   double startY;
@@ -63,6 +93,7 @@ class _HomePageState extends State<HomePage> {
                   physics: NeverScrollableScrollPhysics(),
                   child: CalendarView(
                     key: _calendarKey,
+                    animation: controller.view,
                     collapseView: calendarHeight == calendarMinHeight,
                     selected: _selectedDates,
                     onDateSelected: (datetTime) => setState(() {
@@ -86,10 +117,15 @@ class _HomePageState extends State<HomePage> {
                         (calendarHeight ?? calendarMaxHeight) - diff;
 
                     if (newHeight >= calendarMinHeight &&
-                        newHeight <= calendarMaxHeight)
+                        newHeight <= calendarMaxHeight) {
+                      double range = calendarMaxHeight - calendarMinHeight;
+                      double percent = (newHeight - calendarMinHeight) / range;
+                      controller.animateTo(1 - percent,
+                          duration: Duration(milliseconds: 0));
                       setState(() {
                         calendarHeight = newHeight;
                       });
+                    }
                   },
                   onVerticalDragEnd: (DragEndDetails details) {
                     double mid = calendarMinHeight +
@@ -98,6 +134,7 @@ class _HomePageState extends State<HomePage> {
                       if (calendarHeight != null)
                         calendarHeight =
                             calendarHeight > mid ? null : calendarMinHeight;
+                      _playAnimation();
                     });
                   },
                 ),

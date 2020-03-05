@@ -12,16 +12,19 @@ class CalendarView extends StatelessWidget {
   final List<Event> events;
   final List<DateTime> selected;
   final bool collapseView;
-  final Function onDateSelected;
+  final ValueChanged<DateTime> onDateSelected;
+  final Color monthColor;
+  final Animation<double> animation;
+  CalendarView({
+    this.events,
+    this.onDateSelected,
+    this.collapseView = false,
+    this.selected = const [],
+    this.monthColor,
+    this.animation,
+    Key key,
+  }) : super(key: key);
 
-  CalendarView(
-      {this.events,
-      this.onDateSelected,
-      this.collapseView = false,
-      this.selected = const [],
-      Key key})
-      : super(key: key);
-      
   @override
   Widget build(BuildContext context) {
     return Provider<CalendarBloc>(
@@ -32,6 +35,8 @@ class CalendarView extends StatelessWidget {
         onDateSelected: onDateSelected,
         collapseView: collapseView,
         selected: selected,
+        monthColor: monthColor,
+        animation: animation,
       ),
     );
   }
@@ -42,14 +47,17 @@ class CalendarViewContainer extends StatefulWidget {
   final List<DateTime> selected;
   final bool collapseView;
   final Function onDateSelected;
-
-  CalendarViewContainer(
-      {this.events,
-      this.onDateSelected,
-      this.collapseView = false,
-      this.selected = const [],
-      Key key})
-      : super(key: key);
+  final Color monthColor;
+  final Animation<double> animation;
+  CalendarViewContainer({
+    this.events,
+    this.onDateSelected,
+    this.collapseView = false,
+    this.selected = const [],
+    this.monthColor,
+    this.animation,
+    Key key,
+  }) : super(key: key);
 
   @override
   _CalendarViewContainerState createState() => _CalendarViewContainerState();
@@ -58,6 +66,7 @@ class CalendarViewContainer extends StatefulWidget {
 class _CalendarViewContainerState extends State<CalendarViewContainer> {
   List<String> dateLabels;
 
+  Animation<double> opacity;
   CalendarBloc get bloc {
     return Provider.of<CalendarBloc>(context, listen: false);
   }
@@ -90,6 +99,20 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
           .substring(0, 1),
     );
 
+    if (widget.animation != null)
+      opacity = Tween<double>(
+        begin: 1.0,
+        end: 0.0,
+      ).animate(
+        CurvedAnimation(
+          parent: widget.animation,
+          curve: Interval(
+            0.0,
+            0.9,
+            curve: Curves.easeInOutBack,
+          ),
+        ),
+      );
     super.initState();
   }
 
@@ -104,10 +127,7 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildMonthControll(),
-          SizedBox(
-            height: 8,
-          ),
+          _buildMonthControllWithAnimation(),
           _buildDayHeader(),
           widget.collapseView
               ? CalanderViewCollapse(
@@ -145,54 +165,104 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
     );
   }
 
-  Row _buildMonthControll() {
-    ThemeData theme = Theme.of(context);
-    return Row(
-      children: <Widget>[
-        IconButton(
-          onPressed: () => addMonth(-1),
-          icon: Icon(
-            Icons.chevron_left,
-            size: 32,
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: StreamBuilder<DateTime>(
-              stream: bloc.monthStream,
-              builder: (context, snapshot) {
-                DateTime dateTime = snapshot.data ?? bloc.monthDateTime;
-                String month = DateFormat("MMMM yyyy").format(dateTime);
+  Widget _buildMonthControllWithAnimation() {
+    return widget.animation == null
+        ? _buildMonthControll()
+        : AnimatedBuilder(
+            animation: widget.animation,
+            builder: (context, child) {
+              return _buildMonthControll();
+            },
+          );
+  }
 
-                return InkWell(
-                  onTap: showMonthPicker,
-                  child: Container(
-                    child: Text(
-                      month,
-                      style: theme.textTheme.headline,
+  Container _buildMonthControll() {
+    ThemeData theme = Theme.of(context);
+    double opacityValue;
+    if (opacity == null) {
+      opacityValue = widget.collapseView ? 0 : 1;
+    } else {
+      opacityValue =
+          opacity.value < 0 ? 0 : opacity.value > 1 ? 1 : opacity.value;
+    }
+    Color textColor = widget.monthColor == null
+        ? null
+        : widget.monthColor.computeLuminance() > 0.5
+            ? Colors.black
+            : Colors.white;
+    return Container(
+        height: 64,
+        padding: EdgeInsets.symmetric(horizontal: 16 * (1.0 - opacityValue)),
+        color: widget.monthColor,
+        child: Row(
+          children: <Widget>[
+            Transform.translate(
+              offset: Offset(-24 * (1.0 - opacityValue), 0),
+              child: Container(
+                width: 48 * opacityValue,
+                child: Opacity(
+                  opacity: opacityValue,
+                  child: IconButton(
+                    onPressed: () => addMonth(-1),
+                    icon: Icon(
+                      Icons.chevron_left,
+                      size: 32,
+                      color: textColor,
                     ),
                   ),
-                );
-              }),
-        ),
-        IconButton(
-          onPressed: () => addMonth(1),
-          icon: Icon(
-            Icons.chevron_right,
-            size: 32,
-          ),
-        ),
-      ],
-    );
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: StreamBuilder<DateTime>(
+                  stream: bloc.monthStream,
+                  builder: (context, snapshot) {
+                    DateTime dateTime = snapshot.data ?? bloc.monthDateTime;
+                    String month = DateFormat("MMMM yyyy").format(dateTime);
+
+                    return InkWell(
+                      onTap: widget.collapseView ? null : showMonthPicker,
+                      child: Container(
+                        child: Text(
+                          month,
+                          style: theme.textTheme.headline.copyWith(
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+            Transform.translate(
+              offset: Offset(24 * (1.0 - opacityValue), 0),
+              child: Container(
+                width: 48 * opacityValue,
+                child: Opacity(
+                  opacity: opacityValue,
+                  child: IconButton(
+                    onPressed: () => addMonth(1),
+                    icon: Icon(
+                      Icons.chevron_right,
+                      size: 32,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 
   void showMonthPicker() {
-    showDialog(context: context, builder: (_) => CalendarViewMonthPicker(context: context));
+    showDialog(
+        context: context,
+        builder: (_) => CalendarViewMonthPicker(context: context));
   }
 
   void addMonth(int n) {
     DateTime _dateTime = bloc.monthDateTime;
-    debugPrint("$_dateTime");
     updateDate(DateTime(_dateTime.year, _dateTime.month + n, _dateTime.day));
   }
 

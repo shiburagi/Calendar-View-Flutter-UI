@@ -50,36 +50,43 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
   }
 
   Widget _buildDayLayout(DateTime month) {
-    int noOfWeek = ((firstDayOfMonth + daysInMonth) / 7).ceil();
+    int noOfWeek = 6; //((firstDayOfMonth + daysInMonth) / 7).ceil();
+
     return Container(
-      child: GridView.count(
-        padding: EdgeInsets.all(0),
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        crossAxisCount: 7,
-        childAspectRatio: 1.3,
-        children: List.generate(noOfWeek * 7, (i) {
-          int day = i - firstDayOfMonth + 1;
-          DateTime datetTime = DateTime(month.year, month.month, day);
-          bool notSameMonth = datetTime.month != month.month;
-          return InkWell(
-            onTap: () {
-              if (notSameMonth) {
-                addMonth(datetTime.month - month.month);
-              }
-              bloc.collapseDateTime = null;
-              widget.onDateSelected(datetTime);
-            },
-            child: CalendarViewDate(
-              "${datetTime.day}",
-              selected: widget.selected.isNotEmpty &&
-                  widget.selected[0].millisecondsSinceEpoch ==
-                      datetTime.millisecondsSinceEpoch,
-              notSameMonth: notSameMonth,
-            ),
-          );
-        }),
-      ),
+      child: StreamBuilder<DateTime>(
+          stream: bloc.stream,
+          builder: (context, snapshot) {
+            DateTime selectedDateTime =
+                widget.selected.isNotEmpty ? widget.selected[0] : bloc.dateTime;
+            return GridView.count(
+              padding: EdgeInsets.all(0),
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              crossAxisCount: 7,
+              childAspectRatio: 1.3,
+              children: List.generate(noOfWeek * 7, (i) {
+                int day = i - firstDayOfMonth + 1;
+                DateTime dateTime = DateTime(month.year, month.month, day);
+                bool notSameMonth = dateTime.month != month.month;
+                return InkWell(
+                  onTap: () {
+                    if (notSameMonth) {
+                      addMonth(dateTime.month - month.month);
+                    }
+                    bloc.collapseDateTime = null;
+                    bloc.updateSelectedDate(dateTime);
+                    widget.onDateSelected(dateTime);
+                  },
+                  child: CalendarViewDate(
+                    "${dateTime.day}",
+                    selected: selectedDateTime.millisecondsSinceEpoch ==
+                        dateTime.millisecondsSinceEpoch,
+                    notSameMonth: notSameMonth,
+                  ),
+                );
+              }),
+            );
+          }),
     );
   }
 
