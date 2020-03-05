@@ -29,7 +29,7 @@ class _CalendarViewDateState extends State<CalendarViewDate> {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: widget.notSameMonth
-            ? Colors.black.withOpacity(0.04)
+            ? Colors.black.withOpacity(0.06)
             : Colors.transparent,
       ),
       child: Container(

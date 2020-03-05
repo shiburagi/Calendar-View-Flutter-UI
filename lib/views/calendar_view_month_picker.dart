@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CalendarViewMonthPicker extends StatefulWidget {
+  CalendarViewMonthPicker({this.context, Key key}) : super(key: key);
+  final BuildContext context;
+
   @override
   _CalendarViewMonthPickerState createState() =>
       _CalendarViewMonthPickerState();
@@ -16,7 +19,7 @@ class _CalendarViewMonthPickerState extends State<CalendarViewMonthPicker> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    bloc = Provider.of(context);
+    bloc = Provider.of(widget.context);
   }
 
   @override
@@ -32,7 +35,7 @@ class _CalendarViewMonthPickerState extends State<CalendarViewMonthPicker> {
       child: StreamBuilder<DateTime>(
           stream: bloc.monthStream,
           builder: (context, snapshot) {
-            DateTime monthDateTime = snapshot.data ?? DateTime.now();
+            DateTime monthDateTime = snapshot.data ?? bloc.monthDateTime;
             String year = DateFormat("yyyy").format(monthDateTime);
 
             return Container(

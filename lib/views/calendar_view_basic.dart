@@ -40,15 +40,16 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
 
   @override
   Widget build(BuildContext context) {
+    bloc.collapseDateTime = null;
+
     return StreamBuilder<DateTime>(
         stream: bloc.monthStream,
         builder: (context, snapshot) {
-          return _buildDayLayout(snapshot.data ?? DateTime.now());
+          return _buildDayLayout(snapshot.data ?? bloc.monthDateTime);
         });
   }
 
   Widget _buildDayLayout(DateTime month) {
-    bloc.collapseDateTime = null;
     int noOfWeek = ((firstDayOfMonth + daysInMonth) / 7).ceil();
     return Container(
       child: GridView.count(
