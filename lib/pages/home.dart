@@ -12,7 +12,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  AnimationController controller;
+  AnimationController scrollAnimationController;
+  AnimationController appBarAnimationController;
+
+  PersistentBottomSheetController _bottomSheetController;
 
   ThemeData get theme => Theme.of(context);
   List<DateTime> _selectedDates = [];
@@ -38,7 +41,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     });
     super.initState();
-    controller = AnimationController(
+    scrollAnimationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    appBarAnimationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
   }
 
@@ -52,7 +57,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _collapseAnimation() async {
     try {
-      await controller.forward(from: controller.value).orCancel;
+      await scrollAnimationController
+          .forward(from: scrollAnimationController.value)
+          .orCancel;
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
@@ -60,7 +67,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _expandAnimation() async {
     try {
-      await controller.reverse(from: controller.value).orCancel;
+      await scrollAnimationController
+          .reverse(from: scrollAnimationController.value)
+          .orCancel;
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
@@ -85,13 +94,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               AnimatedBuilder(
-                  animation: controller.view,
+                  animation: scrollAnimationController.view,
                   builder: (context, child) {
                     double height;
                     if (calendarMaxHeight != null) {
                       double range = calendarMaxHeight - calendarMinHeight;
-                      height =
-                          calendarMinHeight + range * (1 - controller.value);
+                      height = calendarMinHeight +
+                          range * (1 - scrollAnimationController.value);
                     }
                     return SizedBox(
                       height: height,
@@ -99,8 +108,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         physics: NeverScrollableScrollPhysics(),
                         child: CalendarView(
                           key: _calendarKey,
-                          animation: controller.view,
-                          collapseView: controller.value == 1,
+                          animation: scrollAnimationController.view,
+                          collapseView: scrollAnimationController.value == 1,
                           selected: _selectedDates,
                           onDateSelected: (datetTime) => setState(() {
                             _selectedDates[0] = datetTime;
@@ -127,7 +136,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         newHeight <= calendarMaxHeight) {
                       double range = calendarMaxHeight - calendarMinHeight;
                       double percent = (newHeight - calendarMinHeight) / range;
-                      controller.animateTo(1 - percent,
+                      scrollAnimationController.animateTo(1 - percent,
                           duration: Duration(milliseconds: 0));
                       // setState(() {
                       calendarHeight = newHeight;
@@ -155,26 +164,43 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  FloatingActionButton _buildFloatingActionButton() {
-    return FloatingActionButton(
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => EventCreator(
-            onEventCreate: (Event event) {
-              setState(() {
-                if (!eventMap.containsKey(_selectedDates[0])) {
-                  eventMap[_selectedDates[0]] = [];
-                }
-                eventMap[_selectedDates[0]].add(event);
+  Widget _buildFloatingActionButton() {
+    bool isShowBottomSheet = _bottomSheetController != null;
+    return Builder(builder: (_context) {
+      return FloatingActionButton(
+        onPressed: () {
+          if (isShowBottomSheet) {
+            _bottomSheetController.close();
+          } else
+            setState(() {
+              _bottomSheetController = showBottomSheet(
+                context: _context,
+                builder: (context) => EventCreator(
+                  onEventCreate: (Event event) {
+                    setState(() {
+                      if (!eventMap.containsKey(_selectedDates[0])) {
+                        eventMap[_selectedDates[0]] = [];
+                      }
+                      eventMap[_selectedDates[0]].add(event);
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              );
+              _bottomSheetController.closed.then((_) {
+                setState(() {
+                  _bottomSheetController = null;
+                });
               });
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
-      child: Icon(Icons.add),
-      backgroundColor: theme.primaryColor,
-    );
+            });
+        },
+        child: Icon(
+          isShowBottomSheet ? Icons.clear : Icons.add,
+          color: isShowBottomSheet ? theme.errorColor : null,
+        ),
+        backgroundColor:
+            isShowBottomSheet ? theme.canvasColor : theme.primaryColor,
+      );
+    });
   }
 }

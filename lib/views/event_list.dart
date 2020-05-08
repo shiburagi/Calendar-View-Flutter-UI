@@ -45,7 +45,7 @@ class _EventListState extends State<EventList> {
                     alignment: Alignment.topCenter,
                     child: Text(
                       "No events",
-                      style: theme.textTheme.headline
+                      style: theme.textTheme.headline6
                           .copyWith(color: Colors.white70),
                     ),
                   )
@@ -103,7 +103,7 @@ class _EventListState extends State<EventList> {
                                       children: <Widget>[
                                         Text(
                                           event.title,
-                                          style: theme.textTheme.subhead
+                                          style: theme.textTheme.subtitle1
                                               .copyWith(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white),

@@ -1,7 +1,17 @@
 import 'package:calendar_view/pages/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(new MyApp());
+  });
+}
+
 Map<int, Color> primarySwatch = {
   50: Color(0xffe6f9ee),
   100: Color(0xffc0f0d4),

@@ -58,6 +58,7 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
           builder: (context, snapshot) {
             DateTime selectedDateTime =
                 widget.selected.isNotEmpty ? widget.selected[0] : bloc.dateTime;
+
             return GridView.count(
               padding: EdgeInsets.all(0),
               shrinkWrap: true,
@@ -79,8 +80,9 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
                   },
                   child: CalendarViewDate(
                     "${dateTime.day}",
-                    selected: selectedDateTime.millisecondsSinceEpoch ==
-                        dateTime.millisecondsSinceEpoch,
+                    selected: DateTime(selectedDateTime.year,
+                            selectedDateTime.month, selectedDateTime.day)
+                        .isAtSameMomentAs(dateTime),
                     notSameMonth: notSameMonth,
                   ),
                 );

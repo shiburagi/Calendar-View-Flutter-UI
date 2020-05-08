@@ -121,7 +121,7 @@ class _CalendarViewMonthPickerState extends State<CalendarViewMonthPicker> {
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Text(
                   month,
-                  style: theme.textTheme.subhead.copyWith(
+                  style: theme.textTheme.subtitle1.copyWith(
                     color: theme.hintColor,
                   ),
                 ),

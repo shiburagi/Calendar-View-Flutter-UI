@@ -15,6 +15,7 @@ class CalendarView extends StatelessWidget {
   final ValueChanged<DateTime> onDateSelected;
   final Color monthColor;
   final Animation<double> animation;
+  final DateTime defaultValue;
   CalendarView({
     this.events,
     this.onDateSelected,
@@ -22,13 +23,16 @@ class CalendarView extends StatelessWidget {
     this.selected = const [],
     this.monthColor,
     this.animation,
+    this.defaultValue,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Provider<CalendarBloc>(
-      create: (_) => CalendarBloc()..updateMonth(DateTime.now()),
+      create: (_) => CalendarBloc()
+        ..updateMonth(DateTime.now())
+        ..updateSelectedDate(defaultValue),
       dispose: (_, CalendarBloc bloc) => bloc.dispose(),
       child: CalendarViewContainer(
         events: events,
@@ -227,7 +231,7 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
                         child: Container(
                           child: Text(
                             month,
-                            style: theme.textTheme.headline.copyWith(
+                            style: theme.textTheme.headline6.copyWith(
                               color: textColor,
                             ),
                           ),
