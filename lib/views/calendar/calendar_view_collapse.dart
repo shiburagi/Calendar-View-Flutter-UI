@@ -1,6 +1,6 @@
 import 'package:calendar_view/bloc/calendar.dart';
 import 'package:calendar_view/entities/event.dart';
-import 'package:calendar_view/views/calendar_view_date.dart';
+import 'package:calendar_view/views/calendar/calendar_view_date.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_view_pager/infinite_view_pager.dart';
 import 'package:provider/provider.dart';

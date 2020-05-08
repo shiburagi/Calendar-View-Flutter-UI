@@ -2,7 +2,7 @@ import 'package:calendar_view/components/time_picker.dart';
 import 'package:calendar_view/entities/event.dart';
 import 'package:calendar_view/helper/date.dart';
 import 'package:calendar_view/helper/time.dart';
-import 'package:calendar_view/views/calendar_view.dart';
+import 'package:calendar_view/views/calendar/calendar_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

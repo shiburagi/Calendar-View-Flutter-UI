@@ -1,9 +1,9 @@
 import 'package:calendar_view/bloc/calendar.dart';
 import 'package:calendar_view/entities/event.dart';
-import 'package:calendar_view/views/calendar_view_basic.dart';
-import 'package:calendar_view/views/calendar_view_collapse.dart';
-import 'package:calendar_view/views/calendar_view_date.dart';
-import 'package:calendar_view/views/calendar_view_month_picker.dart';
+import 'package:calendar_view/views/calendar/calendar_view_basic.dart';
+import 'package:calendar_view/views/calendar/calendar_view_collapse.dart';
+import 'package:calendar_view/views/calendar/calendar_view_date.dart';
+import 'package:calendar_view/views/calendar/calendar_view_month_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
