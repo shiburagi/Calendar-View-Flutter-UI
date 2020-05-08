@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:math';
 
+import 'package:calendar_view/components/button.dart';
 import 'package:calendar_view/helper/date.dart';
 import 'package:calendar_view/helper/time.dart';
 import 'package:flutter/material.dart';
@@ -78,39 +79,15 @@ class _TimeRangePickerState extends State<TimeRangePicker> {
         ),
       ),
       body: buildMainContent(theme),
-      bottomNavigationBar: InkWell(
-        onTap: () {
+      bottomNavigationBar: FillFlatButton(
+        text: "Confirm",
+        onPressed: () {
           widget.onConfirm(
             toTime(toTimeFraction(startTimeY)),
             toTime(toTimeFraction(endTimeY)),
           );
           Navigator.of(context).pop();
         },
-        child: Container(
-          height: 48,
-          color: Theme.of(context).accentColor,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                Icons.done,
-                size: 20,
-                color: Theme.of(context).accentIconTheme.color,
-              ),
-              SizedBox(
-                width: 8,
-              ),
-              Text(
-                "Confirm",
-                style: Theme.of(context).accentTextTheme.button,
-              ),
-              SizedBox(
-                width: 28,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -215,7 +192,6 @@ class _TimeRangePickerState extends State<TimeRangePicker> {
     return StatefulBuilder(builder: (context, setState) {
       double startHour = toTimeFraction(startTimeY);
 
-      debugPrint("hour: $startHour");
       return Positioned.fill(
         left: 52,
         child: Stack(
@@ -391,7 +367,6 @@ class _TimeRangePickerState extends State<TimeRangePicker> {
                   _timer = null;
                 } else if (dy < scrollContentHeight + scrollContentY &&
                     this.step > 0) {
-                  debugPrint("$dy, $scrollContentHeight");
                   _timer.cancel();
                   _timer = null;
                 } else {

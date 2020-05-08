@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CalanderViewBasic extends StatefulWidget {
-  final List<Event> events;
+  final Map<DateTime, List<Event>> events;
   final List<DateTime> selected;
   final Function onDateSelected;
 
@@ -69,6 +69,9 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
                 int day = i - firstDayOfMonth + 1;
                 DateTime dateTime = DateTime(month.year, month.month, day);
                 bool notSameMonth = dateTime.month != month.month;
+
+                List<Event> event =
+                    widget.events == null ? [] : widget.events[dateTime] ?? [];
                 return InkWell(
                   onTap: () {
                     if (notSameMonth) {
@@ -84,6 +87,7 @@ class _CalanderViewBasicState extends State<CalanderViewBasic> {
                             selectedDateTime.month, selectedDateTime.day)
                         .isAtSameMomentAs(dateTime),
                     notSameMonth: notSameMonth,
+                    hasEvent: event.isNotEmpty,
                   ),
                 );
               }),

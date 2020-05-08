@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CalendarView extends StatelessWidget {
-  final List<Event> events;
+  final Map<DateTime, List<Event>> events;
   final List<DateTime> selected;
   final bool collapseView;
   final ValueChanged<DateTime> onDateSelected;
@@ -47,7 +47,7 @@ class CalendarView extends StatelessWidget {
 }
 
 class CalendarViewContainer extends StatefulWidget {
-  final List<Event> events;
+  final Map<DateTime, List<Event>> events;
   final List<DateTime> selected;
   final bool collapseView;
   final Function onDateSelected;
@@ -231,9 +231,8 @@ class _CalendarViewContainerState extends State<CalendarViewContainer> {
                         child: Container(
                           child: Text(
                             month,
-                            style: theme.textTheme.headline6.copyWith(
-                              color: textColor,
-                            ),
+                            style: theme.textTheme.headline4.copyWith(
+                                color: textColor, fontWeight: FontWeight.w200),
                           ),
                         ),
                       );

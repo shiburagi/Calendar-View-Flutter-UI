@@ -27,10 +27,18 @@ dependencies:
   infinite_view_pager: ^1.0.0
   provider: ^4.0.4
 
+  # Path
+  path_provider: ^1.6.7
+
+  # Storage
+  sembast: ^2.4.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+    
+dependency_overrides:
+  path: ^1.7.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

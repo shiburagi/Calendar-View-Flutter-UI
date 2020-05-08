@@ -1,3 +1,4 @@
+import 'package:calendar_view/components/button.dart';
 import 'package:calendar_view/components/time_picker.dart';
 import 'package:calendar_view/entities/event.dart';
 import 'package:calendar_view/helper/date.dart';
@@ -8,16 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EventCreator extends StatefulWidget {
-  EventCreator({this.onEventCreate, this.dateTime, Key key}) : super(key: key);
-  final Function onEventCreate;
+  EventCreator({this.onEventCreate, this.dateTime, Key key, this.event})
+      : super(key: key);
+  final Function(Event, bool) onEventCreate;
   final DateTime dateTime;
+  final Event event;
   @override
   _EventCreatorState createState() => _EventCreatorState();
 }
 
 class _EventCreatorState extends State<EventCreator>
     with TickerProviderStateMixin {
-  DateTime _startDateTime = DateTime.now();
+  DateTime _startDateTime;
   DateTime _endDateTime;
   TextEditingController _titleController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -26,17 +29,29 @@ class _EventCreatorState extends State<EventCreator>
   void initState() {
     super.initState();
 
-    if (_startDateTime.minute > 0) {
-      _startDateTime = _startDateTime
-          .add(Duration(hours: 1, minutes: -_startDateTime.minute));
+    if (widget.event == null) {
+      _startDateTime = DateTime.now();
+      if (widget.dateTime != null)
+        _startDateTime = DateTime(widget.dateTime.year, widget.dateTime.month,
+            widget.dateTime.day, _startDateTime.hour, _startDateTime.minute);
+      if (_startDateTime.minute > 0) {
+        _startDateTime = _startDateTime
+            .add(Duration(hours: 1, minutes: -_startDateTime.minute));
+      }
+      _endDateTime = _startDateTime.add(Duration(hours: 1));
+    } else {
+      _startDateTime =
+          DateTime.fromMillisecondsSinceEpoch(widget.event.startDateTime);
+      _endDateTime =
+          DateTime.fromMillisecondsSinceEpoch(widget.event.endDateTime);
+      _titleController.text = widget.event.subject;
+      _messageController.text = widget.event.note;
     }
-
-    _endDateTime = _startDateTime.add(Duration(hours: 1));
   }
 
   @override
   Widget build(BuildContext context) {
-    return _buildCreateEventForm(context);
+    return Container(child: _buildCreateEventForm(context));
   }
 
   Widget _buildCreateEventForm(context) {
@@ -95,14 +110,33 @@ class _EventCreatorState extends State<EventCreator>
                       padding: EdgeInsets.symmetric(vertical: 16),
                       child: RaisedButton(
                         elevation: 0,
-                        onPressed: createEvent,
+                        onPressed: () => createEvent(widget.event != null),
                         child: Text(
-                          "Create",
+                          widget.event == null ? "Create" : "Save",
                           style: theme.textTheme.subtitle1
                               .copyWith(color: theme.accentColor),
                         ),
                       ),
                     ),
+                    widget.event == null
+                        ? Container()
+                        : Container(
+                            margin: EdgeInsets.only(top: 4),
+                            child: ButtonTheme(
+                              minWidth: double.maxFinite,
+                              buttonColor: Colors.red.withOpacity(1),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: RaisedButton(
+                                elevation: 0,
+                                onPressed: createEvent,
+                                child: Text(
+                                  "Delete",
+                                  style: theme.textTheme.subtitle1
+                                      .copyWith(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -116,17 +150,25 @@ class _EventCreatorState extends State<EventCreator>
   Container buildTopContainer(ThemeData theme) {
     return Container(
       color: theme.primaryColor,
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+      padding: EdgeInsets.fromLTRB(24, 0, 72, 16),
       child: TextFormField(
+        autofocus: _titleController.text.isEmpty,
         controller: _titleController,
         cursorColor: Colors.white,
+        maxLines: 3,
+        minLines: 1,
         decoration: InputDecoration(
-            labelText: "Subject",
-            labelStyle: theme.textTheme.subtitle1.copyWith(
-              color: Colors.white70,
-            ),
-            border: InputBorder.none),
-        style: theme.textTheme.headline6.copyWith(color: Colors.white),
+          labelText: "Subject",
+          contentPadding: EdgeInsets.only(top: 0, bottom: 4),
+          labelStyle: theme.textTheme.headline6.copyWith(
+            color: Colors.white70,
+          ),
+          enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.5))),
+          focusedBorder:
+              UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+        ),
+        style: theme.textTheme.headline4.copyWith(color: Colors.white),
       ),
     );
   }
@@ -151,6 +193,9 @@ class _EventCreatorState extends State<EventCreator>
         Text(
           label,
           style: TextStyle(color: theme.disabledColor),
+        ),
+        SizedBox(
+          height: 6,
         ),
         Builder(builder: (_context) {
           return InkWell(
@@ -274,40 +319,62 @@ class _EventCreatorState extends State<EventCreator>
 
   Future showDatePickerDialog(
       BuildContext _context, DateTime dateTime, ThemeData theme) {
+    EdgeInsets padding = MediaQuery.of(context).padding;
     return showDialog(
       context: _context,
       builder: (_) => Dialog(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
         elevation: 16,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            CalendarView(
-              defaultValue: dateTime,
-              monthColor: theme.accentColor,
-              onDateSelected: (DateTime dateTime) {
-                setState(() {
-                  _startDateTime = DateTime(
-                    dateTime.year,
-                    dateTime.month,
-                    dateTime.day,
-                    _startDateTime.hour,
-                    _startDateTime.minute,
-                  );
-                });
-              },
-            ),
-          ],
+        insetPadding:
+            EdgeInsets.fromLTRB(8, padding.top + 8, 8, padding.bottom + 8),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CalendarView(
+                defaultValue: dateTime,
+                // monthColor: theme.primaryColor,
+                onDateSelected: (DateTime dateTime) {
+                  setState(() {
+                    _startDateTime = DateTime(
+                      dateTime.year,
+                      dateTime.month,
+                      dateTime.day,
+                      _startDateTime.hour,
+                      _startDateTime.minute,
+                    );
+                    _endDateTime = DateTime(
+                      dateTime.year,
+                      dateTime.month,
+                      dateTime.day,
+                      _endDateTime.hour,
+                      _endDateTime.minute,
+                    );
+                  });
+                },
+              ),
+              FillFlatButton(
+                text: "Confirm",
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  createEvent() {
-    if (_titleController.text.isEmpty || _messageController.text.isEmpty)
-      return;
+  createEvent([bool isEdit]) {
+    if (_titleController.text.isEmpty) return;
 
-    widget.onEventCreate(
-        Event(title: _titleController.text, message: _messageController.text));
+    Event event = widget.event ?? Event();
+    event.subject = _titleController.text;
+    event.note = _messageController.text;
+    event.startDateTime = _startDateTime.millisecondsSinceEpoch;
+    event.endDateTime = _endDateTime.millisecondsSinceEpoch;
+    widget.onEventCreate(event, isEdit);
 
     _titleController.clear();
     _messageController.clear();

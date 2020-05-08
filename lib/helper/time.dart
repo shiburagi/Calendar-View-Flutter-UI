@@ -10,6 +10,12 @@ class TimeHelper {
     return strings.join(", ");
   }
 
+  static String toDurationTextByDuration(Duration duration) {
+    int hour = (duration.inMinutes / 60).floor();
+    int minute = duration.inMinutes % 60;
+    return toDurationText(hour, minute);
+  }
+
   static String toText(int hour, int minute) {
     return "${twoDigit(hour)}:${twoDigit(minute)}";
   }

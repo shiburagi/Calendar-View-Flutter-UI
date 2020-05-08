@@ -1,9 +1,8 @@
 import 'dart:async';
 
-class CalendarBloc {
-  StreamController<DateTime> _streamController = StreamController<DateTime>();
-  Stream<DateTime> stream;
+import 'package:calendar_view/bloc/base.dart';
 
+class CalendarBloc extends BaseBloc<DateTime> {
   StreamController<DateTime> _monthStreamController =
       StreamController<DateTime>();
   Stream<DateTime> monthStream;
@@ -16,7 +15,6 @@ class CalendarBloc {
   DateTime collapseDateTime;
 
   CalendarBloc() {
-    stream = _streamController.stream.asBroadcastStream();
     monthStream = _monthStreamController.stream.asBroadcastStream();
 
     stream.listen((DateTime data) {
@@ -28,12 +26,12 @@ class CalendarBloc {
   }
 
   void dispose() {
-    _streamController.close();
+    super.dispose();
     _monthStreamController.close();
   }
 
   void updateSelectedDate(DateTime dateTime) {
-    _streamController.sink.add(dateTime);
+    sink.add(dateTime);
   }
 
   void updateMonth(DateTime dateTime) {

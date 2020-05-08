@@ -6,7 +6,7 @@ import 'package:infinite_view_pager/infinite_view_pager.dart';
 import 'package:provider/provider.dart';
 
 class CalanderViewCollapse extends StatefulWidget {
-  final List<Event> events;
+  final Map<DateTime, List<Event>> events;
   final List<DateTime> selected;
   final Function onDateSelected;
 
@@ -81,7 +81,9 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
                               day);
 
                           bool notSameMonth = dateTime.month != month.month;
-
+                          List<Event> event = widget.events == null
+                              ? []
+                              : widget.events[dateTime] ?? [];
                           return InkWell(
                             onTap: () {
                               if (notSameMonth) {
@@ -100,6 +102,7 @@ class _CalanderViewCollapseState extends State<CalanderViewCollapse> {
                                           .abs() <=
                                       0,
                               notSameMonth: notSameMonth,
+                              hasEvent: event.isNotEmpty,
                             ),
                           );
                         }),

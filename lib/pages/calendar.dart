@@ -4,9 +4,12 @@ import 'package:calendar_view/views/event_list.dart';
 import 'package:flutter/material.dart';
 
 class CalendarPage extends StatefulWidget {
-  CalendarPage({Key key, this.selectedDates, this.events}) : super(key: key);
+  const CalendarPage({Key key, this.selectedDates, this.events, this.onEdit})
+      : super(key: key);
   final List<DateTime> selectedDates;
   final Map<DateTime, List<Event>> events;
+  final ValueChanged<Event> onEdit;
+
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
@@ -22,7 +25,7 @@ class _CalendarPageState extends State<CalendarPage>
 
   double startY;
   double endY;
-  
+
   @override
   void initState() {
     super.initState();
@@ -68,10 +71,25 @@ class _CalendarPageState extends State<CalendarPage>
 
   @override
   Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        if (!Navigator.of(context).canPop() &&
+            scrollAnimationController.value == 1) {
+          scrollAnimationController.reverse();
+          return false;
+        }
+        return true;
+      },
+      child: buildContainer(),
+    );
+  }
+
+  Container buildContainer() {
     return Container(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 0),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             AnimatedBuilder(
@@ -88,6 +106,7 @@ class _CalendarPageState extends State<CalendarPage>
                     child: SingleChildScrollView(
                       physics: NeverScrollableScrollPhysics(),
                       child: CalendarView(
+                        events: widget.events,
                         key: _calendarKey,
                         animation: scrollAnimationController.view,
                         collapseView: scrollAnimationController.value == 1,
@@ -101,7 +120,10 @@ class _CalendarPageState extends State<CalendarPage>
                 }),
             Expanded(
               child: GestureDetector(
-                child: EventList(events: widget.events[widget.selectedDates[0]]),
+                child: EventList(
+                  events: widget.events[widget.selectedDates[0]],
+                  onEdit: widget.onEdit,
+                ),
                 onVerticalDragDown: (DragDownDetails details) {
                   startY = details.localPosition.dy;
                 },
@@ -117,8 +139,10 @@ class _CalendarPageState extends State<CalendarPage>
                       newHeight <= calendarMaxHeight) {
                     double range = calendarMaxHeight - calendarMinHeight;
                     double percent = (newHeight - calendarMinHeight) / range;
-                    scrollAnimationController.animateTo(1 - percent,
-                        duration: Duration(milliseconds: 0));
+                    percent = (percent * 10).round() / 10;
+                    if (percent != scrollAnimationController.value)
+                      scrollAnimationController.animateTo(1 - percent,
+                          duration: Duration(milliseconds: 0));
                     // setState(() {
                     calendarHeight = newHeight;
                     // });
